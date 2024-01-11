@@ -155,6 +155,7 @@ def button_function_pars():
         textbox62.delete("0.0", "end")
         textbox62.insert("0.0", rating)
         hotel_name += data["data"]["hotel"]["hotelname"]  # название отеля
+        hotel_name = re.sub(r'\(.*?\)', '', hotel_name).strip()
         textbox7.delete("0.0", "end")
         textbox7.insert("0.0", hotel_name)
         stars = data["data"]["hotel"]["hotelstars"]  # звезды
@@ -163,7 +164,6 @@ def button_function_pars():
         resort_name += data["data"]["hotel"]["hotelregionname"]  # название курорта
         textbox92.delete("0.0", "end")
         textbox92.insert("0.0", resort_name)
-
         beach += data["data"]["hotel"]["detail"]["beach"]  # пляж
         beach = beach.replace("</LI><LI>", '\n')
         pattern = re.compile(r'<.*?>')
@@ -176,7 +176,6 @@ def button_function_pars():
         textbox82.insert("0.0", year_restoration)
     except Exception:
         print('Один из пунктов отсутствует')
-
 
 def button_function_create():
     country = textbox51.get("0.0", "end")  # страна
@@ -250,7 +249,9 @@ def button_function_create():
     # Сохраняем новое изображение
     new_image.save("Hotel-Brochure-Builder/tmp/output/final_image.jpg")
 
-    print(country, departure_date, number_of_nights, room_type, type_of_food, price, rating, hotel_name, stars, resort_name, beach, year_restoration, sep="")
+    print(hotel_name)
+
+    # print(country, departure_date, number_of_nights, room_type, type_of_food, price, rating, hotel_name, stars, resort_name, beach, year_restoration, sep="")
 
 
 def crop_to_aspect_ratio(image, aspect_ratio):
