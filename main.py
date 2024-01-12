@@ -65,6 +65,11 @@ def pars_url(enter_url):
 
 
 def button_function_pars():
+    # УДАЛИТЬ
+    textbox.insert("0.0", "https://diplomat-tour.ru/tours#tvtourid=3071148563")
+    textbox2.insert("0.0", "https://static.tourvisor.ru/hotel_pics/verybig/4/ela-quality-102202340.jpg")
+    # УДАЛИТЬ
+
     ent_url = textbox.get("0.0", "end")
     ent_pic_1 = textbox2.get("0.0", "end")
     # ent_pic_2 = textbox3.get("0.0", "end")
@@ -92,7 +97,7 @@ def button_function_pars():
     stars = ""  # звезды
 
     resort_name = ""  # название курорта
-    beach = "Пляж: "  # пляж
+    beach = ""  # пляж
     year_restoration = "Последняя реставрация: "  # год реставрации
 
     payload = {}
@@ -150,6 +155,9 @@ def button_function_pars():
         textbox81.insert("0.0", type_of_food)
         price += str(data["data"]["tour"]["price"])  # цена
         textbox61.delete("0.0", "end")
+
+        price = format_price(price)
+
         textbox61.insert("0.0", price)
         rating += str(data["data"]["hotel"]["rating"])  # рейтинг
         textbox62.delete("0.0", "end")
@@ -178,12 +186,21 @@ def button_function_pars():
         print('Один из пунктов отсутствует')
 
 def button_function_create():
-    country = textbox51.get("0.0", "end")  # страна
+    country = textbox51.get("0.0", "end").strip()
+    country += ","
+
     departure_date = textbox52.get("0.0", "end")  # дата вылета
+    departure_date = "Дата вылета: " + departure_date
+
     number_of_nights = textbox53.get("0.0", "end")  # кол-во ночей
+    number_of_nights = "Кол-во ночей: " + number_of_nights
 
     room_type = textbox91.get("0.0", "end")  # тип номера
+    room_type = "Тип номера: " + room_type
+
     type_of_food = textbox81.get("0.0", "end")  # тип питания
+    type_of_food = "Тип питания: " + type_of_food
+
     price = textbox61.get("0.0", "end")  # цена
 
     rating = textbox62.get("0.0", "end")  # рейтинг
@@ -240,7 +257,12 @@ def button_function_create():
 
     draw.text((400, 1200), beach, fill="black", font=medium)
 
-    draw.text((400, 880), rating, fill="black", font=medium)
+    if rating == 0:
+        pass
+    else:
+        rating = "Рейтинг: " + rating
+        draw.text((400, 880), rating, fill="black", font=medium)
+
     draw.text((400, 720), type_of_food, fill="black", font=medium)
 
     draw.text((400, 640), room_type, fill="black", font=medium)
@@ -249,10 +271,14 @@ def button_function_create():
     # Сохраняем новое изображение
     new_image.save("Hotel-Brochure-Builder/tmp/output/final_image.jpg")
 
-    print(hotel_name)
-
     # print(country, departure_date, number_of_nights, room_type, type_of_food, price, rating, hotel_name, stars, resort_name, beach, year_restoration, sep="")
 
+def draw_stars(stars):
+    pass
+
+def format_price(price):
+    price = int(price)  # преобразование строки в число
+    return "{:,}₽".format(price).replace(",", " ")
 
 def crop_to_aspect_ratio(image, aspect_ratio):
     width, height = image.size
