@@ -186,9 +186,10 @@ def button_function_pars():
         print('Один из пунктов отсутствует')
 
 def button_function_create():
-    country = textbox51.get("0.0", "end").strip()
-    country += ","
-
+    """
+    Func creates final images with hotels
+    :return: hotel image
+    """
     departure_date = textbox52.get("0.0", "end")  # дата вылета
     departure_date = "Дата вылета: " + departure_date
 
@@ -210,6 +211,9 @@ def button_function_create():
     resort_name = textbox92.get("0.0", "end")  # название курорта
     beach = textbox100.get("0.0", "end")  # пляж
     year_restoration = textbox82.get("0.0", "end")  # год реставрации
+
+    country = textbox51.get("0.0", "end").strip()
+    country += ", " + resort_name
 
     # Открываем изображение
     original_image = Image.open("Hotel-Brochure-Builder/tmp/pic_1.jpg")
@@ -239,42 +243,70 @@ def button_function_create():
     draw = ImageDraw.Draw(new_image)
 
     # Загружаем шрифт
-    bold = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 400)
-    semibold = ImageFont.truetype("fonts/Montserrat-SemiBold.ttf", 160)
-    regular = ImageFont.truetype("fonts/Montserrat-Regular.ttf", 120)
-    medium = ImageFont.truetype("fonts/Montserrat-Medium.ttf", 120)
+    bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 180) # hotel's font
+    bold_price = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 220) # price's font
+    semibold = ImageFont.truetype("fonts/Montserrat-SemiBold.ttf", 80) # country's name/resort
+    regular = ImageFont.truetype("fonts/Montserrat-Regular.ttf", 80) # departure date/number of nights
+    medium = ImageFont.truetype("fonts/Montserrat-Medium.ttf", 60) # beach info/hotel info
 
-    # Добавляем текст на изображение
-    draw.text((400, 960), hotel_name, fill="black", font=bold)
-    # draw.text((400, 1040), stars, fill="black", font=font)
+    def draw_centered_text(draw, text, y, font, fill=(0, 0, 0)):
+        text_width, _ = font.getsize(text)
+        x = (new_image.width - text_width) // 2
+        draw.text((x, y), text, fill=fill, font=font)
 
-    draw.text((400, 400), country, fill="black", font=semibold)
-    draw.text((400, 1120), resort_name, fill="black", font=semibold)
+    # # Вычисляем ширину текста
+    # text_width, _ = bold_name.getsize(hotel_name)
+    # # Вычисляем координату X для центрирования текста
+    # x = (2048 - text_width) // 2
+    # # Добавляем текст на изображение
+    # draw.text((x, 1120), hotel_name, fill=(32, 32, 32), font=bold_name)
 
-    draw.text((400, 800), price, fill="black", font=bold)
-    draw.text((400, 480), departure_date, fill="black", font=regular)
-    draw.text((400, 560), number_of_nights, fill="black", font=regular)
+    draw_centered_text(draw, hotel_name, 1120, bold_name, fill=(32, 32, 32))
 
-    draw.text((400, 1200), beach, fill="black", font=medium)
+    def draw_stars(stars):
+        """
+        This func draws stars on the final image
+        :param stars:
+        :return:
+        """
+        stars = int(stars)
+        # Открываем изображение звезд
+        stars_image = Image.open(f"stars/{stars} star.png")
+
+        # Накладываем изображение звезд на новое изображение
+        new_image.paste(stars_image, (620, 1320), stars_image)  # замените x и y на нужные координаты
+
+    draw_stars(stars)
+
+    draw.text((670, 1500), country, fill=(32, 32, 32), font=semibold)
+    # draw.text((650, 1000), resort_name, fill="black", font=semibold)
+    # draw_centered_text(draw, country, 1500, semibold, fill=(32, 32, 32))
+
+    draw.text((530, 1600), price, fill=(0, 128, 255), font=bold_price)
+    # draw_centered_text(draw, price, 1600, bold_price, fill=(0, 128, 255))
+    # draw.text((540, 1850), departure_date, fill="black", font=regular)
+    draw_centered_text(draw, departure_date, 1850, regular, fill="black")
+    # draw.text((640, 1950), number_of_nights, fill="black", font=regular)
+    draw_centered_text(draw, number_of_nights, 1950, regular, fill="black")
+
+    draw.text((50, 2250), beach, fill="black", font=medium)
+
+
+    draw.text((1100, 2250), type_of_food, fill="black", font=medium)
+
+    draw.text((1100, 2300), room_type, fill="black", font=medium)
+    draw.text((1100, 2350), year_restoration, fill="black", font=medium)
 
     if rating == 0:
         pass
     else:
         rating = "Рейтинг: " + rating
-        draw.text((400, 880), rating, fill="black", font=medium)
-
-    draw.text((400, 720), type_of_food, fill="black", font=medium)
-
-    draw.text((400, 640), room_type, fill="black", font=medium)
-    draw.text((400, 1280), year_restoration, fill="black", font=medium)
+        draw.text((1100, 2400), rating, fill="black", font=medium)
 
     # Сохраняем новое изображение
     new_image.save("Hotel-Brochure-Builder/tmp/output/final_image.jpg")
 
     # print(country, departure_date, number_of_nights, room_type, type_of_food, price, rating, hotel_name, stars, resort_name, beach, year_restoration, sep="")
-
-def draw_stars(stars):
-    pass
 
 def format_price(price):
     price = int(price)  # преобразование строки в число
