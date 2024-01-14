@@ -5,6 +5,7 @@ from idlelib import editor
 from PIL import Image, ImageDraw, ImageFont
 import customtkinter
 import requests
+import textwrap
 import json
 import re
 import os
@@ -242,16 +243,57 @@ def button_function_create():
     # Создаем объект ImageDraw для нового изображения
     draw = ImageDraw.Draw(new_image)
 
+    def name_size(hotel_name):
+        length = len(hotel_name)
+        size = 180
+        size -= (length - 16) * 6
+
+        return size
+
+    if len(hotel_name) <= 16:
+        bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 180)  # hotel's font
+    else:
+        bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", name_size(hotel_name))  # hotel's font
+
     # Загружаем шрифт
-    bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 180) # hotel's font
     bold_price = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 220) # price's font
     semibold = ImageFont.truetype("fonts/Montserrat-SemiBold.ttf", 80) # country's name/resort
     regular = ImageFont.truetype("fonts/Montserrat-Regular.ttf", 80) # departure date/number of nights
     medium = ImageFont.truetype("fonts/Montserrat-Medium.ttf", 60) # beach info/hotel info
 
     def draw_centered_text(draw, text, y, font, fill=(0, 0, 0)):
+        """
+        Draws text in the center
+        :param draw:
+        :param text:
+        :param y:
+        :param font:
+        :param fill:
+        :return: None
+        """
         text_width, _ = font.getsize(text)
         x = (new_image.width - text_width) // 2
+        draw.text((x, y), text, fill=fill, font=font)
+
+    def draw_centered_hotel_name(draw, text, y, x, font, fill=(0, 0, 0)):
+        """
+        Draws hotel's name in the center based on its length
+        :param draw:
+        :param text:
+        :param y:
+        :param x:
+        :param font:
+        :param fill:
+        :return: None
+        """
+        if len(hotel_name) <= 16:
+            text_width, _ = font.getsize(text)
+            x = (new_image.width - text_width) // 2
+        else:
+            text_width, _ = font.getsize(text)
+            x = (new_image.width - text_width) // 2
+            x += 25
+            y += (len(hotel_name) - 16) * 5
         draw.text((x, y), text, fill=fill, font=font)
 
     # # Вычисляем ширину текста
@@ -261,9 +303,10 @@ def button_function_create():
     # # Добавляем текст на изображение
     # draw.text((x, 1120), hotel_name, fill=(32, 32, 32), font=bold_name)
 
-    draw_centered_text(draw, hotel_name, 1120, bold_name, fill=(32, 32, 32))
+    draw_centered_hotel_name(draw, hotel_name, 1120, 600, bold_name, fill=(32, 32, 32))
 
     def draw_stars(stars):
+
         """
         This func draws stars on the final image
         :param stars:
@@ -282,15 +325,48 @@ def button_function_create():
     # draw.text((650, 1000), resort_name, fill="black", font=semibold)
     # draw_centered_text(draw, country, 1500, semibold, fill=(32, 32, 32))
 
-    draw.text((530, 1600), price, fill=(0, 128, 255), font=bold_price)
+    draw.text((530, 1600), price, fill=(99,145,227), font=bold_price)
     # draw_centered_text(draw, price, 1600, bold_price, fill=(0, 128, 255))
     # draw.text((540, 1850), departure_date, fill="black", font=regular)
     draw_centered_text(draw, departure_date, 1850, regular, fill="black")
     # draw.text((640, 1950), number_of_nights, fill="black", font=regular)
     draw_centered_text(draw, number_of_nights, 1950, regular, fill="black")
 
-    draw.text((50, 2250), beach, fill="black", font=medium)
+    # draw.text((50, 2250), beach, fill="black", font=medium)
 
+    def format_text(text, max_width):
+        """
+        Make first letters uppercase.
+        Place dots at the end of every line.
+        Move text to the next line if the line is too long.
+        :param text:
+        :param max_width:
+        :return: beach info text
+        """
+        text = "\n".join([s.capitalize() + '.' if not s.endswith('.') else s.capitalize() for s in text.split('\n')])
+        lines = textwrap.wrap(text, width=max_width)
+        return '\n'.join(lines)
+
+    def adjust_font_size(draw, text, max_lines, font, fill=(0, 0, 0)):
+        lines = text.split('\n')
+        excess_lines = len(lines) - max_lines
+        if excess_lines > 0:
+            # Уменьшаем размер шрифта
+            font_size = font.size - excess_lines * 16  # уменьшаем на 10 единиц для каждой лишней строки
+            font = ImageFont.truetype(font.path, font_size)
+
+            # Переформатируем текст с новым размером шрифта
+            formatted_text = format_text(text, font.getsize('A')[0] * max_width)
+            lines = formatted_text.split('\n')
+
+        return font
+
+    y = 2200
+    max_width = 25  # максимальное количество символов в строке
+    max_lines = 10  # максимальное количество строк
+    formatted_text = format_text(beach, max_width)
+    adjusted_font = adjust_font_size(draw, formatted_text, max_lines, medium)
+    draw.text((50, y), formatted_text, fill="black", font=adjusted_font)
 
     draw.text((1100, 2250), type_of_food, fill="black", font=medium)
 
@@ -306,6 +382,7 @@ def button_function_create():
     # Сохраняем новое изображение
     new_image.save("Hotel-Brochure-Builder/tmp/output/final_image.jpg")
 
+    print(beach)
     # print(country, departure_date, number_of_nights, room_type, type_of_food, price, rating, hotel_name, stars, resort_name, beach, year_restoration, sep="")
 
 def format_price(price):
