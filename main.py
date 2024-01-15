@@ -259,7 +259,8 @@ def button_function_create():
     bold_price = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 220) # price's font
     semibold = ImageFont.truetype("fonts/Montserrat-SemiBold.ttf", 80) # country's name/resort
     regular = ImageFont.truetype("fonts/Montserrat-Regular.ttf", 80) # departure date/number of nights
-    medium = ImageFont.truetype("fonts/Montserrat-Medium.ttf", 60) # beach info/hotel info
+    medium = ImageFont.truetype("fonts/Montserrat-Medium.ttf", 45) # beach info/hotel info
+    medium_big = ImageFont.truetype("fonts/Montserrat-Medium.ttf", 65)  # beach info header/hotel info header
 
     def draw_centered_text(draw, text, y, font, fill=(0, 0, 0)):
         """
@@ -334,55 +335,110 @@ def button_function_create():
 
     # draw.text((50, 2250), beach, fill="black", font=medium)
 
-    def format_text(text, max_width):
-        """
-        Make first letters uppercase.
-        Place dots at the end of every line.
-        Move text to the next line if the line is too long.
-        :param text:
-        :param max_width:
-        :return: beach info text
-        """
-        text = "\n".join([s.capitalize() + '.' if not s.endswith('.') else s.capitalize() for s in text.split('\n')])
-        lines = textwrap.wrap(text, width=max_width)
-        return '\n'.join(lines)
-
-    def adjust_font_size(draw, text, max_lines, font, fill=(0, 0, 0)):
-        lines = text.split('\n')
-        excess_lines = len(lines) - max_lines
-        if excess_lines > 0:
-            # Уменьшаем размер шрифта
-            font_size = font.size - excess_lines * 16  # уменьшаем на 10 единиц для каждой лишней строки
-            font = ImageFont.truetype(font.path, font_size)
-
-            # Переформатируем текст с новым размером шрифта
-            formatted_text = format_text(text, font.getsize('A')[0] * max_width)
-            lines = formatted_text.split('\n')
-
-        return font
+    # def format_text(text, max_width):
+    #     """
+    #     Make first letters uppercase.
+    #     Place dots at the end of every line.
+    #     Move text to the next line if the line is too long.
+    #     :param text:
+    #     :param max_width:
+    #     :return: beach info text
+    #     """
+    #     text = "\n".join([s.capitalize() + '.' if not s.endswith('.') else s.capitalize() for s in text.split('\n')])
+    #     lines = textwrap.wrap(text, width=max_width)
+    #     return '\n'.join(lines)
+    #
+    # def adjust_font_size(draw, text, max_lines, font, fill=(0, 0, 0)):
+    #     lines = text.split('\n')
+    #     excess_lines = len(lines) - max_lines
+    #     if excess_lines > 0:
+    #         # Уменьшаем размер шрифта
+    #         font_size = font.size - excess_lines * 16  # уменьшаем на 10 единиц для каждой лишней строки
+    #         font = ImageFont.truetype(font.path, font_size)
+    #
+    #         # Переформатируем текст с новым размером шрифта
+    #         formatted_text = format_text(text, font.getsize('A')[0] * max_width)
+    #         lines = formatted_text.split('\n')
+    #
+    #     return font
 
     y = 2200
     max_width = 25  # максимальное количество символов в строке
     max_lines = 10  # максимальное количество строк
-    formatted_text = format_text(beach, max_width)
-    adjusted_font = adjust_font_size(draw, formatted_text, max_lines, medium)
-    draw.text((50, y), formatted_text, fill="black", font=adjusted_font)
 
-    draw.text((1100, 2250), type_of_food, fill="black", font=medium)
+    print(beach)
+    print("_____________")
 
-    draw.text((1100, 2300), room_type, fill="black", font=medium)
-    draw.text((1100, 2350), year_restoration, fill="black", font=medium)
+    def wrap_text(text, limit):
+        lines = text.split('\n')
+        new_lines = []
+        for line in lines:
+            words = line.split()
+            current_line = []
+            current_length = 0
+
+            for word in words:
+                if len(word) == 1 or current_length + len(word) <= limit:
+                    current_length += len(word) + 1  # +1 for the space
+                    current_line.append(word)
+                else:
+                    new_lines.append(' '.join(current_line))
+                    current_line = [word]
+                    current_length = len(word)
+
+            new_lines.append(' '.join(current_line))  # add the last line
+
+        return '\n'.join(new_lines)
+
+    formatted_text = wrap_text(beach, 34)
+
+    print(formatted_text)
+
+    #formatted_text = format_text(beach, max_width)
+
+    #print(formatted_text)
+    #print("_____________")
+
+    # adjusted_font = adjust_font_size(draw, formatted_text, max_lines, medium)
+    #draw.text((50, y), formatted_text, fill="black", font=adjusted_font)
+    draw.text((50, 2200), formatted_text, fill="black", font=medium)
+
+    draw.text((50, 2120), "Пляж:", fill="black", font=medium_big)
+    draw.text((1100, 2120), "Отель:", fill="black", font=medium_big)
 
     if rating == 0:
-        pass
+        hotel_info = "\n".join([type_of_food, room_type, year_restoration])
     else:
         rating = "Рейтинг: " + rating
-        draw.text((1100, 2400), rating, fill="black", font=medium)
+        # draw.text((1100, 2400), rating, fill="black", font=medium)
+        hotel_info = "\n".join([type_of_food, room_type, year_restoration, rating])
+
+    # print(hotel_info)
+    # print("_______________")
+
+    # Разделяем текст на строки
+    lines = hotel_info.split('\n')
+
+    # Удаляем пустые строки
+    lines = [line for line in lines if line.strip() != '']
+
+    # Объединяем строки обратно в текст
+    hotel_info = '\n'.join(lines)
+
+    # print(hotel_info)
+
+    # formatted_hotel_info = format_text(hotel_info, max_width)
+
+
+    #print(formatted_hotel_info)
+
+    # И наконец, мы можем вывести эту информацию на изображении
+    #draw.text((1100, 2250), formatted_hotel_info, fill="black", font=adjusted_font)
+    draw.text((1100, 2250), hotel_info, fill="black", font=medium)
 
     # Сохраняем новое изображение
     new_image.save("Hotel-Brochure-Builder/tmp/output/final_image.jpg")
 
-    print(beach)
     # print(country, departure_date, number_of_nights, room_type, type_of_food, price, rating, hotel_name, stars, resort_name, beach, year_restoration, sep="")
 
 def format_price(price):
