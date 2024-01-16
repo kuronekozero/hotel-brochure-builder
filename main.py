@@ -369,6 +369,30 @@ def button_function_create():
     print(beach)
     print("_____________")
 
+    def format_text(beach):
+        # Разбиваем текст на строки
+        lines = beach.split('\n')
+        # Обрабатываем каждую строку
+        for i in range(len(lines)):
+            # Убираем пробелы в начале и конце строки
+            lines[i] = lines[i].strip()
+            # Если строка не пустая и не начинается с точки
+            if lines[i] and not lines[i].startswith('.'):
+                # Делаем первую букву заглавной
+                lines[i] = lines[i][0].upper() + lines[i][1:]
+            # Если строка не пустая и не заканчивается точкой
+            if lines[i] and not lines[i].endswith('.'):
+                # Добавляем точку в конец строки
+                lines[i] += '.'
+        # Соединяем строки обратно в текст
+        beach = '\n'.join(lines)
+        return beach
+
+    beach = format_text(beach)
+
+    print(beach)
+    print("_____________")
+
     def wrap_text(text, limit):
         lines = text.split('\n')
         new_lines = []
@@ -378,7 +402,11 @@ def button_function_create():
             current_length = 0
 
             for word in words:
-                if len(word) == 1 or current_length + len(word) <= limit:
+                if len(word) <= 4 and current_line:
+                    # Если слово короче 4 символов, добавляем его к текущей строке
+                    current_length += len(word) + 1  # +1 for the space
+                    current_line.append(word)
+                elif current_length + len(word) <= limit:
                     current_length += len(word) + 1  # +1 for the space
                     current_line.append(word)
                 else:
@@ -390,7 +418,7 @@ def button_function_create():
 
         return '\n'.join(new_lines)
 
-    formatted_text = wrap_text(beach, 34)
+    formatted_text = wrap_text(beach, 33)
 
     print(formatted_text)
 
@@ -401,10 +429,10 @@ def button_function_create():
 
     # adjusted_font = adjust_font_size(draw, formatted_text, max_lines, medium)
     #draw.text((50, y), formatted_text, fill="black", font=adjusted_font)
-    draw.text((50, 2200), formatted_text, fill="black", font=medium)
+    draw.text((50, 2150), formatted_text, fill="black", font=medium)
 
-    draw.text((50, 2120), "Пляж:", fill="black", font=medium_big)
-    draw.text((1100, 2120), "Отель:", fill="black", font=medium_big)
+    draw.text((50, 2076), "Пляж:", fill="black", font=medium_big)
+    draw.text((1100, 2076), "Отель:", fill="black", font=medium_big)
 
     if rating == 0:
         hotel_info = "\n".join([type_of_food, room_type, year_restoration])
@@ -425,6 +453,9 @@ def button_function_create():
     # Объединяем строки обратно в текст
     hotel_info = '\n'.join(lines)
 
+    hotel_info = format_text(hotel_info)
+    hotel_info = wrap_text(hotel_info, 30)
+
     # print(hotel_info)
 
     # formatted_hotel_info = format_text(hotel_info, max_width)
@@ -434,7 +465,7 @@ def button_function_create():
 
     # И наконец, мы можем вывести эту информацию на изображении
     #draw.text((1100, 2250), formatted_hotel_info, fill="black", font=adjusted_font)
-    draw.text((1100, 2250), hotel_info, fill="black", font=medium)
+    draw.text((1100, 2150), hotel_info, fill="black", font=medium)
 
     # Сохраняем новое изображение
     new_image.save("Hotel-Brochure-Builder/tmp/output/final_image.jpg")
