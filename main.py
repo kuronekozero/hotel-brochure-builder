@@ -67,8 +67,8 @@ def pars_url(enter_url):
 
 def button_function_pars():
     # УДАЛИТЬ
-    textbox.insert("0.0", "https://diplomat-tour.ru/tours#tvtourid=3071148563")
-    textbox2.insert("0.0", "https://static.tourvisor.ru/hotel_pics/verybig/4/ela-quality-102202340.jpg")
+    # textbox.insert("0.0", "https://diplomat-tour.ru/tours#tvtourid=3089350910")
+    # textbox2.insert("0.0", "https://static.tourvisor.ru/hotel_pics/verybig/4/ela-quality-102202340.jpg")
     # УДАЛИТЬ
 
     ent_url = textbox.get("0.0", "end")
@@ -99,7 +99,7 @@ def button_function_pars():
 
     resort_name = ""  # название курорта
     beach = ""  # пляж
-    year_restoration = "Последняя реставрация: "  # год реставрации
+    year_restoration = ""  # год реставрации
 
     payload = {}
     headers = {
@@ -142,15 +142,19 @@ def button_function_pars():
 
         type_of_food += data["data"]["tour"]["meal"]  # тип питания
         if type_of_food == "BB":
-            type_of_food = "BB - Только завтрак"
+            type_of_food = "Только завтрак(BB)"
         if type_of_food == "HB":
-            type_of_food = "HB - Завтрак, ужин"
+            type_of_food = "Завтрак, ужин(HB)"
         if type_of_food == "FB":
-            type_of_food = "FB - Полный пансион"
+            type_of_food = "Полный пансион(FB)"
         if type_of_food == "AI":
-            type_of_food = "AI - Все включено"
+            type_of_food = "Все включено(AI)"
         if type_of_food == "UAI":
-            type_of_food = "UAI - Ультра все включено"
+            type_of_food = "Ультра все включено(UAI)"
+        if type_of_food == "RO":
+            type_of_food = "Только комната(RO)"
+        if type_of_food == "CB":
+            type_of_food = "Континентальный завтра(CB)"
 
         textbox81.delete("0.0", "end")
         textbox81.insert("0.0", type_of_food)
@@ -246,7 +250,7 @@ def button_function_create():
     def name_size(hotel_name):
         length = len(hotel_name)
         size = 180
-        size -= (length - 16) * 6
+        size -= (length - 16) * 7
 
         return size
 
@@ -326,7 +330,13 @@ def button_function_create():
     # draw.text((650, 1000), resort_name, fill="black", font=semibold)
     # draw_centered_text(draw, country, 1500, semibold, fill=(32, 32, 32))
 
-    draw.text((530, 1600), price, fill=(99,145,227), font=bold_price)
+    if len(price) == 8:
+        draw.text((580, 1600), price, fill=(99,145,227), font=bold_price)
+    elif len(price) == 7:
+        draw.text((650, 1600), price, fill=(99, 145, 227), font=bold_price)
+    else:
+        draw.text((530, 1600), price, fill=(99,145,227), font=bold_price)
+
     # draw_centered_text(draw, price, 1600, bold_price, fill=(0, 128, 255))
     # draw.text((540, 1850), departure_date, fill="black", font=regular)
     draw_centered_text(draw, departure_date, 1850, regular, fill="black")
@@ -366,9 +376,6 @@ def button_function_create():
     max_width = 25  # максимальное количество символов в строке
     max_lines = 10  # максимальное количество строк
 
-    print(beach)
-    print("_____________")
-
     def format_text(beach):
         # Разбиваем текст на строки
         lines = beach.split('\n')
@@ -389,9 +396,6 @@ def button_function_create():
         return beach
 
     beach = format_text(beach)
-
-    print(beach)
-    print("_____________")
 
     def wrap_text(text, limit):
         lines = text.split('\n')
@@ -420,8 +424,6 @@ def button_function_create():
 
     formatted_text = wrap_text(beach, 33)
 
-    print(formatted_text)
-
     #formatted_text = format_text(beach, max_width)
 
     #print(formatted_text)
@@ -431,15 +433,33 @@ def button_function_create():
     #draw.text((50, y), formatted_text, fill="black", font=adjusted_font)
     draw.text((50, 2150), formatted_text, fill="black", font=medium)
 
-    draw.text((50, 2076), "Пляж:", fill="black", font=medium_big)
-    draw.text((1100, 2076), "Отель:", fill="black", font=medium_big)
+    #info headers
 
-    if rating == 0:
+    if formatted_text != "\n":
+        draw.text((50, 2076), "Пляж:", fill="black", font=medium_big)
+
+    if rating == "0\n":
+        rating = None
+
+    if year_restoration == '\n':
+        year_restoration = None
+
+    if rating == None and year_restoration != None:
+        year_restoration = "Последняя реставрация: " + year_restoration
         hotel_info = "\n".join([type_of_food, room_type, year_restoration])
-    else:
+
+    elif year_restoration == None and rating != None:
         rating = "Рейтинг: " + rating
-        # draw.text((1100, 2400), rating, fill="black", font=medium)
+        hotel_info = "\n".join([type_of_food, room_type, rating])
+
+    elif rating == None and year_restoration == None:
+        hotel_info = "\n".join([type_of_food, room_type])
+
+    else:
+        year_restoration = "Последняя реставрация: " + year_restoration
+        rating = "Рейтинг: " + rating
         hotel_info = "\n".join([type_of_food, room_type, year_restoration, rating])
+
 
     # print(hotel_info)
     # print("_______________")
@@ -461,11 +481,33 @@ def button_function_create():
     # formatted_hotel_info = format_text(hotel_info, max_width)
 
 
+
     #print(formatted_hotel_info)
 
-    # И наконец, мы можем вывести эту информацию на изображении
-    #draw.text((1100, 2250), formatted_hotel_info, fill="black", font=adjusted_font)
-    draw.text((1100, 2150), hotel_info, fill="black", font=medium)
+    if formatted_text != "\n":
+        draw.text((1100, 2076), "Отель:", fill="black", font=medium_big)
+
+        #draw.text((1100, 2250), formatted_hotel_info, fill="black", font=adjusted_font)
+        draw.text((1100, 2150), hotel_info, fill="black", font=medium)
+
+        draw.text((1100, 2400), "Контакты:", fill="black", font=medium_big)
+
+        draw.text((1100, 2480), "+7(495)245-02-95", fill="black", font=medium)
+        draw.text((1100, 2540), "+7(903)745-14-68", fill="black", font=medium)
+        draw.text((1100, 2600), "office@diplomattour.ru", fill="black", font=medium)
+        draw.text((1100, 2660), "Москва, ул.Ярославская, д.21А, оф.15", fill="black", font=medium)
+    else:
+        draw.text((700, 2076), "Отель:", fill="black", font=medium_big)
+
+        # draw.text((1100, 2250), formatted_hotel_info, fill="black", font=adjusted_font)
+        draw.text((700, 2150), hotel_info, fill="black", font=medium)
+
+        draw.text((700, 2400), "Контакты:", fill="black", font=medium_big)
+
+        draw.text((700, 2480), "+7(495)245-02-95", fill="black", font=medium)
+        draw.text((700, 2540), "+7(903)745-14-68", fill="black", font=medium)
+        draw.text((700, 2600), "office@diplomattour.ru", fill="black", font=medium)
+        draw.text((700, 2660), "Москва, ул.Ярославская, д.21А, оф.15", fill="black", font=medium)
 
     # Сохраняем новое изображение
     new_image.save("Hotel-Brochure-Builder/tmp/output/final_image.jpg")
