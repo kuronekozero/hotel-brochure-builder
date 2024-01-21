@@ -4,6 +4,7 @@ from idlelib import editor
 
 from PIL import Image, ImageDraw, ImageFont
 import customtkinter
+import tkinter as tk
 import requests
 import textwrap
 import json
@@ -161,6 +162,7 @@ def button_function_pars():
         price += str(data["data"]["tour"]["price"])  # цена
         textbox61.delete("0.0", "end")
 
+        price = int(price) / 2
         price = format_price(price)
 
         textbox61.insert("0.0", price)
@@ -177,8 +179,10 @@ def button_function_pars():
         resort_name += data["data"]["hotel"]["hotelregionname"]  # название курорта
         textbox92.delete("0.0", "end")
         textbox92.insert("0.0", resort_name)
+
         beach += data["data"]["hotel"]["detail"]["beach"]  # пляж
         beach = beach.replace("</LI><LI>", '\n')
+        beach = beach.replace("<BR>", '\n')
         pattern = re.compile(r'<.*?>')
         beach = re.sub(pattern, '', beach)
         textbox100.delete("0.0", "end")
@@ -326,7 +330,10 @@ def button_function_create():
 
     draw_stars(stars)
 
-    draw.text((670, 1500), country, fill=(32, 32, 32), font=semibold)
+
+    draw_centered_hotel_name(draw, country, 1500, 1500, semibold, fill=(32, 32, 32))
+    # draw.text((670, 1500), country, fill=(32, 32, 32), font=semibold)
+
     # draw.text((650, 1000), resort_name, fill="black", font=semibold)
     # draw_centered_text(draw, country, 1500, semibold, fill=(32, 32, 32))
 
@@ -387,8 +394,8 @@ def button_function_create():
             if lines[i] and not lines[i].startswith('.'):
                 # Делаем первую букву заглавной
                 lines[i] = lines[i][0].upper() + lines[i][1:]
-            # Если строка не пустая и не заканчивается точкой
-            if lines[i] and not lines[i].endswith('.'):
+            # Если строка не пустая и не заканчивается точкой, запятой или двоеточием
+            if lines[i] and not lines[i].endswith('.') and not lines[i].endswith(',') and not lines[i].endswith(':'):
                 # Добавляем точку в конец строки
                 lines[i] += '.'
         # Соединяем строки обратно в текст
@@ -480,8 +487,6 @@ def button_function_create():
 
     # formatted_hotel_info = format_text(hotel_info, max_width)
 
-
-
     #print(formatted_hotel_info)
 
     if formatted_text != "\n":
@@ -509,8 +514,25 @@ def button_function_create():
         draw.text((700, 2600), "office@diplomattour.ru", fill="black", font=medium)
         draw.text((700, 2660), "Москва, ул.Ярославская, д.21А, оф.15", fill="black", font=medium)
 
+    # Путь к папке, где вы хотите сохранить изображения
+    output_dir = "Hotel-Brochure-Builder/tmp/output/"
+    # Базовое имя для изображений
+    base_filename = "final_image"
+    # Расширение файлов
+    extension = ".jpg"
+    # Начинаем с 1
+    i = 1
+
+    # Формируем полное имя файла
+    filename = os.path.join(output_dir, f"{base_filename}{i}{extension}")
+
+    # Если файл уже существует, увеличиваем i, пока не найдем имя, которого еще нет
+    while os.path.exists(filename):
+        i += 1
+        filename = os.path.join(output_dir, f"{base_filename}{i}{extension}")
+
     # Сохраняем новое изображение
-    new_image.save("Hotel-Brochure-Builder/tmp/output/final_image.jpg")
+    new_image.save(filename)
 
     # print(country, departure_date, number_of_nights, room_type, type_of_food, price, rating, hotel_name, stars, resort_name, beach, year_restoration, sep="")
 
@@ -538,6 +560,12 @@ def resize_image(image, size):
 
     return image.resize((max_width, max_height), Image.ANTIALIAS)
 
+def paste_link(textbox):
+    # Получаем текст из буфера обмена
+    clipboard_text = app.clipboard_get()
+    # Вставляем текст в текстовое поле
+    textbox.insert(tk.END, clipboard_text)
+
 def create_white_background(height, width):
     return Image.new('RGB', (width, height), 'white')
 
@@ -559,27 +587,31 @@ textbox_1_y = 0.04
 
 logo_label = customtkinter.CTkLabel(app, text="Основная ссылка", font=customtkinter.CTkFont(size=14, weight="bold"))
 logo_label.place(relx=deflt_relx, rely=label_1_y + otnrely * counter_y)
+
+textbox_relwidth = 0.65  # уменьшаем ширину текстового поля
 textbox = customtkinter.CTkTextbox(app, height=25)
-textbox.place(relx=deflt_relx, rely=textbox_1_y + otnrely * counter_y, relwidth=1 - deflt_relx * 2)
+textbox.place(relx=deflt_relx, rely=textbox_1_y + otnrely * counter_y, relwidth=textbox_relwidth)
+
+# Создаем кнопку "Вставить" для первого текстового поля
+button_relx = deflt_relx + textbox_relwidth + 0.02  # увеличиваем координату x для кнопки
+button_relwidth = 0.25  # ширина кнопки
+paste_button1 = customtkinter.CTkButton(app, text="Вставить", command=lambda: paste_link(textbox))
+paste_button1.place(relx=button_relx, rely=textbox_1_y + otnrely * counter_y, relwidth=button_relwidth)
+
 counter_y += 1
 
 logo_label2 = customtkinter.CTkLabel(app, text="Фото общего вида", font=customtkinter.CTkFont(size=14, weight="bold"))
 logo_label2.place(relx=deflt_relx, rely=label_1_y + otnrely * counter_y)
+
 textbox2 = customtkinter.CTkTextbox(app, height=25)
-textbox2.place(relx=deflt_relx, rely=textbox_1_y + otnrely * counter_y, relwidth=1 - deflt_relx * 2)
+textbox2.place(relx=deflt_relx, rely=textbox_1_y + otnrely * counter_y, relwidth=textbox_relwidth)
+
+# Создаем кнопку "Вставить" для второго текстового поля
+paste_button2 = customtkinter.CTkButton(app, text="Вставить", command=lambda: paste_link(textbox2))
+paste_button2.place(relx=button_relx, rely=textbox_1_y + otnrely * counter_y, relwidth=button_relwidth)
+
 counter_y += 1
 
-# logo_label3 = customtkinter.CTkLabel(app, text="Фото пляжа", font=customtkinter.CTkFont(size=14, weight="bold"))
-# logo_label3.place(relx=deflt_relx, rely=label_1_y +otnrely*counter_y)
-# textbox3 = customtkinter.CTkTextbox(app, height=25)
-# textbox3.place(relx=deflt_relx, rely=textbox_1_y  +otnrely*counter_y , relwidth=1-deflt_relx*2)
-# counter_y += 1
-#
-# logo_label4 = customtkinter.CTkLabel(app, text="Фото комнаты", font=customtkinter.CTkFont(size=14, weight="bold"))
-# logo_label4.place(relx=deflt_relx, rely=label_1_y +otnrely*counter_y)
-# textbox4 = customtkinter.CTkTextbox(app, height=25)
-# textbox4.place(relx=deflt_relx, rely=textbox_1_y  +otnrely*counter_y , relwidth=1-deflt_relx*2)
-# counter_y += 1
 
 button = customtkinter.CTkButton(master=app, text="Получить данные", command=button_function_pars)
 button.place(relx=deflt_relx, rely=0.03 + otnrely * counter_y, relwidth=1 - deflt_relx * 2)
