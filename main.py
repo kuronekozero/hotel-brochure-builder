@@ -142,20 +142,24 @@ def button_function_pars():
         textbox91.insert("0.0", room_type)
 
         type_of_food += data["data"]["tour"]["meal"]  # тип питания
-        if type_of_food == "BB":
-            type_of_food = "Только завтрак(BB)"
-        if type_of_food == "HB":
-            type_of_food = "Завтрак, ужин(HB)"
-        if type_of_food == "FB":
-            type_of_food = "Полный пансион(FB)"
-        if type_of_food == "AI":
-            type_of_food = "Все включено(AI)"
-        if type_of_food == "UAI":
-            type_of_food = "Ультра все включено(UAI)"
-        if type_of_food == "RO":
-            type_of_food = "Только комната(RO)"
-        if type_of_food == "CB":
-            type_of_food = "Континентальный завтра(CB)"
+
+        def update_food_type(type_of_food):
+            food_dict = {
+                "BB": "Только завтрак(BB)",
+                "HB": "Завтрак, ужин(HB)",
+                "FB": "Полный пансион(FB)",
+                "AI": "Все включено(AI)",
+                "UAI": "Ультра все включено(UAI)",
+                "RO": "Только комната(RO)",
+                "CB": "Континентальный завтрак(CB)"
+            }
+
+            for key in food_dict:
+                if key in type_of_food:
+                    return food_dict[key]
+            return type_of_food
+
+        type_of_food = update_food_type(type_of_food)
 
         textbox81.delete("0.0", "end")
         textbox81.insert("0.0", type_of_food)
@@ -413,7 +417,7 @@ def button_function_create():
             current_length = 0
 
             for word in words:
-                if len(word) <= 4 and current_line:
+                if len(word) <= 3 and current_line:
                     # Если слово короче 4 символов, добавляем его к текущей строке
                     current_length += len(word) + 1  # +1 for the space
                     current_line.append(word)
@@ -481,7 +485,7 @@ def button_function_create():
     hotel_info = '\n'.join(lines)
 
     hotel_info = format_text(hotel_info)
-    hotel_info = wrap_text(hotel_info, 30)
+    hotel_info = wrap_text(hotel_info, 35)
 
     # print(hotel_info)
 
