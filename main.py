@@ -231,7 +231,11 @@ def button_function_create():
     # Открываем изображение
     original_image = Image.open("Hotel-Brochure-Builder/tmp/pic_1.jpg")
     # Открываем изображение шаблона
-    template_image = Image.open("template.png")
+
+    if beach != "\n":
+        template_image = Image.open("template.png")
+    else:
+        template_image = Image.open("template_no_corner.png")
 
     # Вызываем функцию crop_to_aspect_ratio
     cropped_image = crop_to_aspect_ratio(original_image, 12 / 8)
@@ -255,17 +259,46 @@ def button_function_create():
     # Создаем объект ImageDraw для нового изображения
     draw = ImageDraw.Draw(new_image)
 
-    def name_size(hotel_name):
-        length = len(hotel_name)
-        size = 180
-        size -= (length - 16) * 7
+    # def name_size(hotel_name):
+    #     length = len(hotel_name)
+    #     size = 180
+    #     size -= (length - 16) * 7
+    #
+    #     return size
+
+    # if len(hotel_name) <= 12:
+    #bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 180)  # hotel's font
+    # else:
+    #     bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", name_size(hotel_name))  # hotel's font
+
+    def get_font_size(text, font_name, max_width):
+        size = 180  # начальный размер шрифта
+        font = ImageFont.truetype(font_name, size)
+        text_width, _ = font.getsize(text)
+
+        while text_width > max_width:
+            size -= 1
+            font = ImageFont.truetype(font_name, size)
+            text_width, _ = font.getsize(text)
 
         return size
 
-    if len(hotel_name) <= 16:
-        bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 180)  # hotel's font
-    else:
-        bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", name_size(hotel_name))  # hotel's font
+    def draw_centered_hotel_name(draw, text, y, image_width, font, fill=(0, 0, 0)):
+        text_width, text_height = font.getsize(text)
+        x = (image_width - text_width) // 2
+        y = y - text_height // 2 + 100  # adjust y coordinate based on text height
+        draw.text((x, y), text, fill=fill, font=font)
+
+    max_width = 1800  # максимальная ширина текста
+    image_width = 2048  # ширина изображения
+
+    font_size = get_font_size(hotel_name, "fonts/Montserrat-Bold.ttf", max_width)
+
+    bold_name = ImageFont.truetype("fonts/Montserrat-Bold.ttf", font_size)  # hotel's font
+
+    draw_centered_hotel_name(draw, hotel_name, 1120, image_width, bold_name, fill=(32, 32, 32))
+
+    # draw_centered_text(draw, hotel_name, 1120, image_width, font, fill=(32, 32, 32))
 
     # Загружаем шрифт
     bold_price = ImageFont.truetype("fonts/Montserrat-Bold.ttf", 220) # price's font
@@ -288,25 +321,30 @@ def button_function_create():
         x = (new_image.width - text_width) // 2
         draw.text((x, y), text, fill=fill, font=font)
 
-    def draw_centered_hotel_name(draw, text, y, x, font, fill=(0, 0, 0)):
-        """
-        Draws hotel's name in the center based on its length
-        :param draw:
-        :param text:
-        :param y:
-        :param x:
-        :param font:
-        :param fill:
-        :return: None
-        """
-        if len(hotel_name) <= 16:
-            text_width, _ = font.getsize(text)
-            x = (new_image.width - text_width) // 2
-        else:
-            text_width, _ = font.getsize(text)
-            x = (new_image.width - text_width) // 2
-            x += 25
-            y += (len(hotel_name) - 16) * 5
+    # def draw_centered_hotel_name(draw, text, y, x, font, fill=(0, 0, 0)):
+    #     """
+    #     Draws hotel's name in the center based on its length
+    #     :param draw:
+    #     :param text:
+    #     :param y:
+    #     :param x:
+    #     :param font:
+    #     :param fill:
+    #     :return: None
+    #     """
+    #     if len(hotel_name) <= 16:
+    #         text_width, _ = font.getsize(text)
+    #         x = (new_image.width - text_width) // 2
+    #     else:
+    #         text_width, _ = font.getsize(text)
+    #         x = (new_image.width - text_width) // 2
+    #         x += 25
+    #         y += (len(hotel_name) - 16) * 5
+    #     draw.text((x, y), text, fill=fill, font=font)
+
+    def draw_centered_country_name(draw, text, y, image_width, font, fill=(0, 0, 0)):
+        text_width, _ = font.getsize(text)
+        x = (image_width - text_width) // 2
         draw.text((x, y), text, fill=fill, font=font)
 
     # # Вычисляем ширину текста
@@ -316,7 +354,7 @@ def button_function_create():
     # # Добавляем текст на изображение
     # draw.text((x, 1120), hotel_name, fill=(32, 32, 32), font=bold_name)
 
-    draw_centered_hotel_name(draw, hotel_name, 1120, 600, bold_name, fill=(32, 32, 32))
+    # draw_centered_hotel_name(draw, hotel_name, 1120, 600, bold_name, fill=(32, 32, 32))
 
     def draw_stars(stars):
 
@@ -330,12 +368,12 @@ def button_function_create():
         stars_image = Image.open(f"stars/{stars} star.png")
 
         # Накладываем изображение звезд на новое изображение
-        new_image.paste(stars_image, (620, 1320), stars_image)  # замените x и y на нужные координаты
+        new_image.paste(stars_image, (680, 1320), stars_image)  # замените x и y на нужные координаты
 
     draw_stars(stars)
 
 
-    draw_centered_hotel_name(draw, country, 1500, 1500, semibold, fill=(32, 32, 32))
+    draw_centered_country_name(draw, country, 1500, image_width, semibold, fill=(32, 32, 32))
     # draw.text((670, 1500), country, fill=(32, 32, 32), font=semibold)
 
     # draw.text((650, 1000), resort_name, fill="black", font=semibold)
